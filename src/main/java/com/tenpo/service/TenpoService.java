@@ -39,9 +39,9 @@ public class TenpoService {
             try{
                 percentage = percentageStorage.getPercentage();
             }catch(ExecutionException e2){
-                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes");
+                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes.");
             }catch(NumberFormatException e3){
-                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes");
+                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes.");
             }
 
         }
