@@ -30,5 +30,9 @@ public class PercentageStorage {
         return new BigDecimal(cache.get("PERCENTAGE"));
     }
 
-
+    public void setConfiguration(TimeUnit timeUnit, Integer duration) {
+        this.cache = CacheBuilder.newBuilder()
+                                 .expireAfterWrite(duration, timeUnit)
+                                 .build(loader);
+    }
 }

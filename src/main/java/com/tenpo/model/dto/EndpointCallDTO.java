@@ -2,8 +2,6 @@ package com.tenpo.model.dto;
 
 
 import com.tenpo.model.entity.EndpointCall;
-import jakarta.persistence.Column;
-import jakarta.websocket.Endpoint;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +15,9 @@ public class EndpointCallDTO {
     private String error;
     private LocalDateTime date;
 
+    public EndpointCallDTO(){
+
+    }
 
     public EndpointCallDTO(Long id, String url, String httpMethod, String statusCode, byte[] response, String error) {
         this.id = id;

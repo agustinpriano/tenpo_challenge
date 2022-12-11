@@ -16,10 +16,14 @@ public class TenpoService {
     private PercentageStorage percentageStorage;
 
     @Autowired
-    private PercentageMockedService percentageMockedService;
+    private PercentageService percentageService;
 
+    public TenpoService(PercentageService percentageService, PercentageStorage percentageStorage) {
+        this.percentageService = percentageService;
+        this.percentageStorage = percentageStorage;
+    }
 
-    public PercentageSumDTO sumNumbersWithPercentage(BigDecimal number1, BigDecimal number2) {
+    public PercentageSumDTO sumNumbersWithPercentage(BigDecimal number1, BigDecimal number2) throws StoragedValueException{
 
         BigDecimal percentage = getPercentageToApply();
         BigDecimal partialSum = number1.add(number2);
@@ -29,7 +33,7 @@ public class TenpoService {
 
     }
 
-    private BigDecimal getPercentageToApply() {
+    public BigDecimal getPercentageToApply() {
         BigDecimal percentage;
         try{
             percentage = getExternalPercentageToApplyWithRetries();
@@ -47,15 +51,17 @@ public class TenpoService {
         return percentage;
     }
 
-    private BigDecimal getExternalPercentageToApplyWithRetries() {
+    public BigDecimal getExternalPercentageToApplyWithRetries() {
         int count = 0;
         int maxTries = 3;
         while(true) {
             try {
-                return percentageMockedService.getPercentage();
-            } catch (Exception e) {
+                return percentageService.getPercentage();
+            } catch (RuntimeException e) {
                 count++;
-                if (count == maxTries) throw new PercentageAPIMaxTriesException("The maximum number of available calls to the PercentageAPI has been exceeded.");
+                if (count == maxTries) {
+                    throw new PercentageAPIMaxTriesException("The maximum number of available calls to the PercentageAPI has been exceeded.");
+                }
             }
         }
     }

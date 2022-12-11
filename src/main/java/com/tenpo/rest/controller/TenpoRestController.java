@@ -9,34 +9,22 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Refill;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.*;
 
 import java.math.BigDecimal;
-import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/")
-public class ApiREST {
+public class TenpoRestController {
 
     public final Bucket bucket;
 
-    public final Integer apiCallsPerMinute = 1000;
-
-    public ApiREST() {
-        Bandwidth limit = Bandwidth.classic(apiCallsPerMinute, Refill.greedy(apiCallsPerMinute, Duration.ofMinutes(1)));
-        this.bucket = Bucket4j.builder()
-                .addLimit(limit)
-                .build();
-    }
+    public final Integer apiCallsPerMinute = 3;
 
     @Autowired
     private EndpointCallService endpointCallService;
@@ -44,11 +32,18 @@ public class ApiREST {
     @Autowired
     private TenpoService tenpoService;
 
+    public TenpoRestController() {
+        Bandwidth limit = Bandwidth.classic(apiCallsPerMinute, Refill.greedy(apiCallsPerMinute, Duration.ofMinutes(1)));
+        this.bucket = Bucket4j.builder()
+                .addLimit(limit)
+                .build();
+    }
+
     @GetMapping("endpointCall")
     private ResponseEntity<List<EndpointCallDTO>> getAllEndpointCalls(
             HttpServletRequest request,
-            @RequestParam("offset") Integer offset,
-            @RequestParam("pageSize") Integer pageSize) {
+            @RequestParam(value = "offset", defaultValue = "0") Integer offset,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
 
         if(validateMaxRequestPerMinute()){
             throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
@@ -67,7 +62,7 @@ public class ApiREST {
             @PathVariable("number2") BigDecimal number2,
             HttpServletRequest request) {
 
-        if (!bucket.tryConsume(1)) {
+        if (validateMaxRequestPerMinute()) {
             throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
         }
 
@@ -84,7 +79,15 @@ public class ApiREST {
 
         }
 
+    }
 
+    @GetMapping("foo")
+    public String foo() {
+
+        if(validateMaxRequestPerMinute()){
+            throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
+        }
+        return "";
     }
 
     private boolean validateMaxRequestPerMinute() {

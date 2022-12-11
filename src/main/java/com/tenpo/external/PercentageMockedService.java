@@ -1,6 +1,5 @@
 package com.tenpo.external;
 
-import com.google.common.cache.*;
 import org.springframework.context.annotation.*;
 import org.springframework.stereotype.*;
 
@@ -11,7 +10,7 @@ import java.math.*;
 public class PercentageMockedService extends PercentageService{
 
     @Override
-    public BigDecimal getPercentage() { // Esto debería poder devolver una excepcion
+    public BigDecimal getPercentage() throws RuntimeException{
         return new BigDecimal(10);
     }
 }

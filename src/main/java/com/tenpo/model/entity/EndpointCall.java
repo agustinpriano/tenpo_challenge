@@ -12,10 +12,10 @@ public class EndpointCall {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "URL", nullable = false)
+    @Column(name = "URL")
     private String url;
 
-    @Column(name = "HTTP_METHOD", nullable = false)
+    @Column(name = "HTTP_METHOD")
     private String httpMethod;
 
     @Column(name = "STATUS_CODE")
