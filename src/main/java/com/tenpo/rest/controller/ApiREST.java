@@ -1,6 +1,6 @@
 package com.tenpo.rest.controller;
 
-import com.tenpo.model.dto.EndpointCallDTO;
+import com.tenpo.model.dto.*;
 import com.tenpo.model.error.*;
 import com.tenpo.service.EndpointCallService;
 import com.tenpo.service.TenpoService;
@@ -27,15 +27,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/")
 public class ApiREST {
 
-    // TODO: 7/12/2022
-    /*
-        Cosas que faltan hacer:
-        - Manejar errores de mejor forma (INTERNAL_SERVER_ERROR)
-        -
-     */
     public final Bucket bucket;
 
-    public final Integer apiCallsPerMinute = 3;
+    public final Integer apiCallsPerMinute = 1000;
 
     public ApiREST() {
         Bandwidth limit = Bandwidth.classic(apiCallsPerMinute, Refill.greedy(apiCallsPerMinute, Duration.ofMinutes(1)));
@@ -51,21 +45,24 @@ public class ApiREST {
     private TenpoService tenpoService;
 
     @GetMapping("endpointCall")
-    private ResponseEntity<List<EndpointCallDTO>> getAllEndpointCalls(HttpServletRequest request) {
+    private ResponseEntity<List<EndpointCallDTO>> getAllEndpointCalls(
+            HttpServletRequest request,
+            @RequestParam("offset") Integer offset,
+            @RequestParam("pageSize") Integer pageSize) {
 
         if(validateMaxRequestPerMinute()){
             throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
         }
 
-        ResponseEntity<List<EndpointCallDTO>> response = ResponseEntity.ok(endpointCallService.getAllEndpointCalls().stream().map(EndpointCallDTO::fromEntity).collect(Collectors.toList()));
+        ResponseEntity<List<EndpointCallDTO>> response = ResponseEntity.ok(endpointCallService.getAllEndpointCalls(offset, pageSize).stream().map(EndpointCallDTO::fromEntity).collect(Collectors.toList()));
 
-        endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), response.getStatusCode().toString(), response.toString().getBytes()));
+        endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), response.getStatusCode().toString(), response.getBody().toString().getBytes(), ""));
 
         return response;
     }
 
     @GetMapping("{number1}/{number2}/sum_with_percentage")
-    private ResponseEntity<String> sumNumbersWithPercentage(
+    private ResponseEntity<PercentageSumDTO> sumNumbersWithPercentage(
             @PathVariable("number1") BigDecimal number1,
             @PathVariable("number2") BigDecimal number2,
             HttpServletRequest request) {
@@ -74,11 +71,20 @@ public class ApiREST {
             throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
         }
 
-        ResponseEntity<String> response = ResponseEntity.ok("Sum with percentage applied: " + tenpoService.sumNumbersWithPercentage(number1, number2).toString());
+        try{
+            ResponseEntity<PercentageSumDTO> response = ResponseEntity.ok(tenpoService.sumNumbersWithPercentage(number1, number2));
+            endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), response.getStatusCode().toString(), response.getBody().toString().getBytes(), ""));
 
-        endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), response.getStatusCode().toString(), response.toString().getBytes()));
+            return response;
 
-        return response;
+        }catch(StoragedValueException e){
+
+            endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), "500", "".getBytes(), e.getMessage()));
+            throw new APIExecutionError(e.getMessage());
+
+        }
+
+
     }
 
     private boolean validateMaxRequestPerMinute() {

@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 
 @EnableConfigurationProperties
-@SpringBootApplication(scanBasePackages = {"com.tenpo.rest", "com.tenpo.service", "com.tenpo.external"})
-@EntityScan(basePackages = {"com.tenpo.model", "com.tenpo.external"})
+@SpringBootApplication(scanBasePackages = {"com.tenpo.rest", "com.tenpo.service", "com.tenpo.external", "com.tenpo.config"})
+@EntityScan(basePackages = {"com.tenpo.model", "com.tenpo.external", "com.tenpo.config"})
 @EnableJpaRepositories("com.tenpo.repository")
 public class TenpoChallengeApplication {
 

@@ -1,6 +1,7 @@
 package com.tenpo.service;
 
 import com.tenpo.external.*;
+import com.tenpo.model.dto.*;
 import com.tenpo.model.error.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -18,22 +19,20 @@ public class TenpoService {
     private PercentageMockedService percentageMockedService;
 
 
-    public BigDecimal sumNumbersWithPercentage(BigDecimal number1, BigDecimal number2) {
+    public PercentageSumDTO sumNumbersWithPercentage(BigDecimal number1, BigDecimal number2) {
 
         BigDecimal percentage = getPercentageToApply();
-
-        BigDecimal percentageToApply = new BigDecimal(1).add(percentage.divide(new BigDecimal(100)));
-
         BigDecimal partialSum = number1.add(number2);
+        BigDecimal result = partialSum.multiply(new BigDecimal(1).add(percentage.divide(new BigDecimal(100))));
 
-        return partialSum.multiply(percentageToApply);
+        return new PercentageSumDTO(number1, number2, percentage, result);
 
     }
 
     private BigDecimal getPercentageToApply() {
         BigDecimal percentage;
         try{
-            percentage = getExternalPercentageToApply();
+            percentage = getExternalPercentageToApplyWithRetries();
             percentageStorage.savePercentage(percentage.toString());
         }catch(PercentageAPIMaxTriesException e){
             try{
@@ -48,7 +47,7 @@ public class TenpoService {
         return percentage;
     }
 
-    private BigDecimal getExternalPercentageToApply() {
+    private BigDecimal getExternalPercentageToApplyWithRetries() {
         int count = 0;
         int maxTries = 3;
         while(true) {

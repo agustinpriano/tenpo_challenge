@@ -24,15 +24,19 @@ public class EndpointCall {
     @Column(name = "RESPONSE")
     private byte[] response;
 
+    @Column(name = "ERROR")
+    private String error;
+
     @Column(name = "DATE")
     private LocalDateTime date;
 
-    public EndpointCall(Long id, String url, String httpMethod, String statusCode, byte[] response) {
+    public EndpointCall(Long id, String url, String httpMethod, String statusCode, byte[] response, String error) {
         this.id = id;
         this.url = url;
         this.httpMethod = httpMethod;
         this.statusCode = statusCode;
         this.response = response;
+        this.error = error;
         this.date = LocalDateTime.now();
     }
 
@@ -64,14 +68,6 @@ public class EndpointCall {
         this.httpMethod = httpMethod;
     }
 
-    public byte[] getResponse() {
-        return response;
-    }
-
-    public void setResponse(byte[] response) {
-        this.response = response;
-    }
-
     public String getStatusCode() {
         return statusCode;
     }
@@ -86,5 +82,21 @@ public class EndpointCall {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
+    }
+
+    public byte[] getResponse() {
+        return response;
+    }
+
+    public void setResponse(byte[] response) {
+        this.response = response;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

@@ -14,27 +14,31 @@ public class EndpointCallDTO {
     private String httpMethod;
     private String statusCode;
     private byte[] response;
+    private String error;
     private LocalDateTime date;
 
-    public EndpointCallDTO(Long id, String url, String httpMethod, String statusCode, byte[] response, LocalDateTime date) {
+
+    public EndpointCallDTO(Long id, String url, String httpMethod, String statusCode, byte[] response, String error) {
         this.id = id;
         this.url = url;
         this.httpMethod = httpMethod;
         this.statusCode = statusCode;
         this.response = response;
-        this.date = date;
+        this.error = error;
+        this.date = LocalDateTime.now();
     }
 
-    public EndpointCallDTO(String url, String httpMethod, String statusCode, byte[] response) {
+    public EndpointCallDTO(String url, String httpMethod, String statusCode, byte[] response, String error) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.statusCode = statusCode;
         this.response = response;
+        this.error = error;
         this.date = LocalDateTime.now();
     }
 
     public static EndpointCallDTO fromEntity(EndpointCall endpointCall){
-        return new EndpointCallDTO(endpointCall.getId(), endpointCall.getUrl(), endpointCall.getHttpMethod(), endpointCall.getStatusCode(), endpointCall.getResponse(), endpointCall.getDate());
+        return new EndpointCallDTO(endpointCall.getId(), endpointCall.getUrl(), endpointCall.getHttpMethod(), endpointCall.getStatusCode(), endpointCall.getResponse(), endpointCall.getError());
     }
 
     public Long getId() {
@@ -61,6 +65,14 @@ public class EndpointCallDTO {
         this.httpMethod = httpMethod;
     }
 
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
     public byte[] getResponse() {
         return response;
     }
@@ -69,7 +81,19 @@ public class EndpointCallDTO {
         this.response = response;
     }
 
-    public String getStatusCode() {
-        return statusCode;
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 }
