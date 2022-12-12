@@ -46,7 +46,9 @@ public class TenpoRestController {
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
 
         if(validateMaxRequestPerMinute()){
-            throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
+            String message = "Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API";
+            endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), "429", "".getBytes(), message));
+            throw new TooManyRequestException(message);
         }
 
         ResponseEntity<List<EndpointCallDTO>> response = ResponseEntity.ok(endpointCallService.getAllEndpointCalls(offset, pageSize).stream().map(EndpointCallDTO::fromEntity).collect(Collectors.toList()));
@@ -63,7 +65,9 @@ public class TenpoRestController {
             HttpServletRequest request) {
 
         if (validateMaxRequestPerMinute()) {
-            throw new TooManyRequestException("Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API");
+            String message = "Se superó el límite de " + apiCallsPerMinute + " requests por minuto para la API";
+            endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), "429", "".getBytes(), message));
+            throw new TooManyRequestException(message);
         }
 
         try{
