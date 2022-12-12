@@ -1,6 +1,7 @@
 package com.tenpo.external;
 
 import com.google.common.cache.*;
+import com.tenpo.model.error.*;
 import org.springframework.context.annotation.*;
 import org.springframework.stereotype.*;
 
@@ -24,6 +25,10 @@ public class PercentageStorage {
 
     public void savePercentage(String value){
         cache.put("PERCENTAGE", value);
+    }
+
+    public void removePercentage(){
+        cache.cleanUp();
     }
 
     public BigDecimal getPercentage() throws ExecutionException {

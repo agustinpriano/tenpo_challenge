@@ -5,21 +5,22 @@ import com.tenpo.model.dto.*;
 import com.tenpo.model.error.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.*;
 
 import java.math.BigDecimal;
 import java.util.concurrent.*;
 
 @Service
-public class TenpoService {
+public class SumService {
 
     @Autowired
     private PercentageStorage percentageStorage;
 
     @Autowired
-    private PercentageService percentageService;
+    private PercentageAPIService percentageAPIService;
 
-    public TenpoService(PercentageService percentageService, PercentageStorage percentageStorage) {
-        this.percentageService = percentageService;
+    public SumService(PercentageAPIService percentageAPIService, PercentageStorage percentageStorage) {
+        this.percentageAPIService = percentageAPIService;
         this.percentageStorage = percentageStorage;
     }
 
@@ -42,11 +43,10 @@ public class TenpoService {
             try{
                 percentage = percentageStorage.getPercentage();
             }catch(ExecutionException e2){
-                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes.");
+                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes to apply.");
             }catch(NumberFormatException e3){
-                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes.");
+                throw new StoragedValueException("There isn't any cached percentage value in the last 30 minutes to apply.");
             }
-
         }
         return percentage;
     }
@@ -56,8 +56,8 @@ public class TenpoService {
         int maxTries = 3;
         while(true) {
             try {
-                return percentageService.getPercentage();
-            } catch (RuntimeException e) {
+                return percentageAPIService.getPercentage();
+            } catch (RestClientException e) {
                 count++;
                 if (count == maxTries) {
                     throw new PercentageAPIMaxTriesException("The maximum number of available calls to the PercentageAPI has been exceeded.");
@@ -66,4 +66,7 @@ public class TenpoService {
         }
     }
 
+    public PercentageStorage getPercentageStorage() {
+        return percentageStorage;
+    }
 }

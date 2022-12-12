@@ -3,7 +3,7 @@ package com.tenpo.rest.controller;
 import com.tenpo.model.dto.*;
 import com.tenpo.model.error.*;
 import com.tenpo.service.EndpointCallService;
-import com.tenpo.service.TenpoService;
+import com.tenpo.service.SumService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
@@ -26,18 +26,18 @@ public class TenpoRestController {
 
     public final Integer apiCallsPerMinute = 3;
 
-    @Autowired
-    private EndpointCallService endpointCallService;
-
-    @Autowired
-    private TenpoService tenpoService;
-
     public TenpoRestController() {
         Bandwidth limit = Bandwidth.classic(apiCallsPerMinute, Refill.greedy(apiCallsPerMinute, Duration.ofMinutes(1)));
         this.bucket = Bucket4j.builder()
                 .addLimit(limit)
                 .build();
     }
+
+    @Autowired
+    private EndpointCallService endpointCallService;
+
+    @Autowired
+    private SumService sumService;
 
     @GetMapping("endpointCall")
     private ResponseEntity<List<EndpointCallDTO>> getAllEndpointCalls(
@@ -67,18 +67,15 @@ public class TenpoRestController {
         }
 
         try{
-            ResponseEntity<PercentageSumDTO> response = ResponseEntity.ok(tenpoService.sumNumbersWithPercentage(number1, number2));
+            ResponseEntity<PercentageSumDTO> response = ResponseEntity.ok(sumService.sumNumbersWithPercentage(number1, number2));
             endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), response.getStatusCode().toString(), response.getBody().toString().getBytes(), ""));
 
             return response;
 
         }catch(StoragedValueException e){
-
             endpointCallService.create(new EndpointCallDTO(request.getRequestURI(), request.getMethod(), "500", "".getBytes(), e.getMessage()));
             throw new APIExecutionError(e.getMessage());
-
         }
-
     }
 
     @GetMapping("foo")

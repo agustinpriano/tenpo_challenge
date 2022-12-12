@@ -9,31 +9,29 @@ import java.math.*;
 import java.util.concurrent.*;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PercentageStorageTest {
 
     @Autowired
     PercentageStorage percentageStorage;
 
     @Test
-    @Order(1)
-    void test_percentage_storage_not_found() throws ExecutionException {
+    void test_percentage_storage_cached_value_with_empty_cache() throws ExecutionException {
+        percentageStorage.setConfiguration(TimeUnit.MILLISECONDS, 200);
+
         NumberFormatException thrown = Assertions.assertThrows(NumberFormatException.class, () -> {
             BigDecimal percentage = percentageStorage.getPercentage();
         });
     }
 
     @Test
-    @Order(2)
-    void test_percentage_storage_ok() throws ExecutionException {
+    void test_percentage_storage_cached_value_ok() throws ExecutionException {
         percentageStorage.savePercentage("10");
         BigDecimal percentage = percentageStorage.getPercentage();
         Assertions.assertTrue("10".equals(percentage.toString()));
     }
 
     @Test
-    @Order(3)
-    void test_percentage_storage_expiration() throws ExecutionException, InterruptedException {
+    void test_percentage_storage_cached_value_expired() throws ExecutionException, InterruptedException {
         percentageStorage.setConfiguration(TimeUnit.MILLISECONDS, 200);
         percentageStorage.savePercentage("10");
         Thread.sleep(250);
